@@ -8,6 +8,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+  /* Weather widget — small card that matches site */
+  .weather-card {
+    max-width: 340px;
+    background: linear-gradient(180deg, var(--white), var(--bg-card));
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 12px 30px rgba(28,25,23,0.06);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--border);
+    margin: 12px 0;
+  }
+  .weather-icon { font-size: 40px; line-height:1; }
+  .weather-temp { font-family: var(--font-display); font-size: 28px; font-weight: 400; }
+  .weather-meta { font-size: 13px; color: var(--text-muted); }
+  </style>
 </head>
 <body>
 
@@ -103,6 +121,17 @@
 
   <hr class="section-divider">
 
+  <!-- Weather (uses browser geolocation + open-meteo) -->
+  <section class="section">
+    <div class="weather-card" id="weather">
+      <div class="weather-icon" id="weather-icon">⛅</div>
+      <div>
+        <div class="weather-temp" id="weather-temp">—°F</div>
+        <div class="weather-meta" id="weather-meta">Loading weather…</div>
+      </div>
+    </div>
+  </section>
+
   <!-- Contact -->
   <section class="contact-section" id="contact">
     <span class="section-label">Let's Talk</span>
@@ -120,6 +149,61 @@
       <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
     </nav>
   </footer>
+
+<script>
+(function(){
+  const elTemp = document.getElementById('weather-temp');
+  const elMeta = document.getElementById('weather-meta');
+  const elIcon = document.getElementById('weather-icon');
+
+  function codeToEmoji(code){
+    if (code === 0) return '☀️';
+    if ([1,2].includes(code)) return '🌤️';
+    if (code === 3) return '☁️';
+    if ([45,48].includes(code)) return '🌫️';
+    if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return '🌧️';
+    if ([71,73,75,77,85,86].includes(code)) return '❄️';
+    if ([95,96,99].includes(code)) return '⛈️';
+    return '🌈';
+  }
+
+  function showError(msg){
+    if (elTemp) elTemp.textContent = '—';
+    if (elMeta) elMeta.textContent = msg;
+    if (elIcon) elIcon.textContent = '❓';
+  }
+
+  if (!navigator.geolocation){
+    showError('Geolocation not supported');
+    return;
+  }
+
+  elMeta.textContent = 'Requesting location…';
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    elMeta.textContent = 'Fetching weather…';
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&timezone=auto`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Weather fetch failed');
+      const data = await res.json();
+      const w = data.current_weather;
+      if (!w) throw new Error('No current weather');
+      if (elTemp) elTemp.textContent = Math.round(w.temperature) + '°F';
+      if (elIcon) elIcon.textContent = codeToEmoji(w.weathercode);
+      if (elMeta) elMeta.textContent = `Wind ${w.windspeed} km/h • ${Math.round(w.winddirection)}°`;
+    } catch (e){
+      console.error(e);
+      showError('Unable to load weather');
+    }
+  }, (err) => {
+    console.warn(err);
+    showError('Enable location to see your weather');
+  }, { timeout: 10000 });
+})();
+</script>
 
 </body>
 </html>
