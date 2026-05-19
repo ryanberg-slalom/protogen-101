@@ -799,3 +799,39 @@ ul {
     align-items: flex-start;
   }
 }
+
+/* ================================================
+   Weather section (moved from inline)
+   ================================================ */
+.weather-card {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: none;
+  border-radius: 0;
+  /* tighter vertical padding to remove excess top/bottom space */
+  padding: clamp(16px, 4vw, 36px)  var(--pad-x);
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3.6vw, 40px);
+  border: none;
+  margin-top: 0;
+  min-height: 160px;
+}
+.weather-icon { font-size: 88px; line-height:1; color:var(--accent); }
+.weather-temp { font-family: var(--font-display); font-size: clamp(36px, 7vw, 88px); font-weight: 400; color:var(--text); }
+.weather-meta { font-size: 16px; color: var(--text-muted); margin-top:8px; }
+.weather-left { display:flex; align-items:flex-start; gap:18px; min-width:320px; }
+.weather-main { display:flex; flex-direction:column; line-height:1; }
+.weather-forecast { display:flex; gap:28px; margin-left: auto; align-items:center; justify-content:flex-end; flex:1; }
+.forecast-day { display:flex; flex-direction:column; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); min-width:72px; background: var(--bg-card); padding:8px 10px; border-radius:10px; }
+.forecast-day .icon { width:40px; height:40px; display:block; }
+.forecast-day .t { font-size:13px; color:var(--text); }
+.forecast-day .day { font-weight:600; color:var(--text); font-size:12px; }
+.weather-divider { width:1px; height:56px; background:var(--border); margin-left:24px; }
+@media (max-width:1100px){ .weather-card{min-height:140px; padding:20px var(--pad-x);} .weather-icon{font-size:72px} }
+@media (max-width:700px){
+  .weather-card{flex-direction:column; align-items:flex-start; min-height:unset; padding:20px var(--pad-x);} 
+  .weather-forecast{ display:none; }
+}
